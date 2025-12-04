@@ -6,7 +6,7 @@ class Copperskin_Ranger(Unit):
         super().__init__(power, player, x, y, tribe)
 
     def on_play(self, player1: Player, player2: Player, b: Board):
-        units: [Unit] = []
+        units: [Unit] = [] #can ignore this warning message, it works perfectly
         for row in b.board:
             for cell in row:
                 if cell is not None:
@@ -15,3 +15,4 @@ class Copperskin_Ranger(Unit):
         if units != []:
             rand = random.randint(0, len(units) - 1)
             units[rand].poisoned = True
+            print(units[rand].poisoned)
