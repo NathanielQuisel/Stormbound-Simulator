@@ -86,17 +86,6 @@ class Game:
             if spell.valid_play(self.b):
                 player.play_card(card_num)
                 spell.on_play(player,enemy, self.b)
-            # if card.name == "Summon_Militia":
-            #     player.play_card(card_num)
-            #     self.Summon_Militia(player)
-            # elif card.name == "Kindred's_Grace":
-            #     if self.check_single_target(x, y, self.cur_player):
-            #         player.play_card(card_num)
-            #         self.Kindred_Grace(x, y)
-            # elif card.name == "Herald's_Hymn":
-            #     if self.check_single_target(x, y, self.cur_player):
-            #         player.play_card(card_num)
-            #         self.Herald_Hymn(x, y)
 
         elif self.check_play(card_num, x, y):
             player.play_card(card_num)
