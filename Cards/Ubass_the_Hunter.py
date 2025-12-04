@@ -6,7 +6,7 @@ class Ubass_the_Hunter(Unit):
         super().__init__(power, player, x, y, tribe)
 
     def on_play(self, player1: Player, player2: Player, b: Board):
-        units = self.surrounding_units(b)
+        units = b.surrounding_units(self.x,self.y)
         tribes = []
         for unit in units:
             if unit.tribe not in tribes and not unit.is_building:

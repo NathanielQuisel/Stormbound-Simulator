@@ -4,28 +4,6 @@ import numpy as np
 from typing import List, Tuple, Dict, Optional, Union
 from Helper_Classes import Deck,Player,Board,Unit,Card,Spell
 import Cards
-# from Cards import (
-#     Amberhides,
-#     Broodmother_Qordia,
-#     Bucks_of_Wasteland,
-#     Copperskin_Ranger,
-#     Counselor_Ahmi,
-#     Crimson_Sentry,
-#     Cursed_Cemetery,
-#     Dopplebocks,
-#     Dragon_Egg,
-#     Dreadfauns,
-#     Edrik_the_Fierce,
-#     Faun_Companions,
-#     First_Mutineer,
-#     Freebooters,
-#     Moonlit_Aerie,
-#     Northsea_Dog,
-#     Siren_of_the_Seas,
-#     Swarmcallers,
-#     Ubass_the_Hunter,
-#     Vindictive_Wretches,
-# )
 
 Coord      = Tuple[int, int]          # (x, y) board position
 PlayAction = Tuple[int, Coord]        # (card_idx, (x, y))
@@ -145,60 +123,8 @@ class Game:
         return moves
 
     def move_unit(self, y, x, y_dir, x_dir):
-        unit: Optional[Unit] = self.b.board[y][x]
-        power = unit.power
         (player, enemy) = self.find_players()
-        row = y + y_dir
-        col = x + x_dir
-        if row < 0:  # only happens forward
-            if unit.vitalized:
-                unit.change_power(1)
-            unit.on_attack(None, player, enemy, self.b)
-            unit.before_move(player, enemy, self.b)
-            self.b.board[y][x] = None
-            player.change_life(-power)
-            unit.change_power(-power)
-            unit.on_death(player, enemy, self.b)
-            return
-
-        ahead: Optional[Unit] = self.b.board[row][col]
-        if ahead is None:  # only happens when moving forward
-            unit.before_move(player, enemy, self.b)
-            self.b.board[y][x] = None
-            self.b.board[row][col] = unit
-            unit.set_coors(col, row)
-            unit.after_move(player, enemy, self.b)
-            self.simple_set_limit(row)
-        elif ahead.player == self.cur_player:  # only happens when moving forward
-            return
-        else:  # omnidirectional
-            unit.on_attack(ahead, player, enemy, self.b)
-            unit.before_move(player, enemy, self.b)
-            if power > ahead.power:
-                unit.change_power(-ahead.power)
-                self.b.board[row][col] = None
-                ahead.change_power(-ahead.power)
-                ahead.on_death(enemy, player, self.b)
-                self.b.board[row][col] = unit
-                unit.on_survive(ahead.power, player, enemy, self.b)
-                self.b.board[y][x] = None
-                unit.set_coors(col, row)
-                unit.after_move(player, enemy, self.b)
-                unit.after_attack(player, enemy, self.b)
-                self.simple_set_limit(row)
-            elif ahead.power > power:
-                ahead.change_power(-power)
-                self.b.board[y][x] = None
-                unit.change_power(-power)
-                unit.on_death(player, enemy, self.b)
-                ahead.on_survive(power, enemy, player, self.b)
-            else:
-                self.b.board[row][col] = None
-                self.b.board[y][x] = None
-                ahead.change_power(-ahead.power)
-                unit.change_power(-power)
-                ahead.on_death(enemy, player, self.b)
-                unit.on_death(player, enemy, self.b)
+        self.b.move_unit(self.cur_player, player,enemy,y,x,y_dir,x_dir)
 
     def advance_units(self):
         (player, enemy) = self.find_players()
@@ -246,11 +172,6 @@ class Game:
             self.player1.set_limit(greatest)
         else:
             self.player2.set_limit(greatest)
-
-    def simple_set_limit(self, y):
-        (player, _) = self.find_players()
-        if y < player.limit and y != 0:
-            player.set_limit(y)
 
     def end_turn(self):
         (player, _) = self.find_players()
@@ -396,33 +317,6 @@ class Game:
         info = {}                       # add diagnostics here
         return obs, reward, done, info
 
-    def Summon_Militia(self, player: Player):
-        good = []
-        for i in range(5):
-            for j in range(4):
-                if self.b.board[i][j] is None and i >= player.limit:
-                    good.append((i, j))
-        if good != []:
-            rand = random.randint(0, len(good) - 1)
-            (y, x) = good[rand]
-            self.b.board[y][x] = Unit(1, self.cur_player, x, y, "knight")
-
-    def Kindred_Grace(self, x, y):
-        unit = self.b.board[y][x]
-        unit.change_power(5)
-        for u in Unit.all_units(Unit,self.b):
-            if u.tribe == unit.tribe and u.player == unit.player:
-                u.change_power(2)
-
-    def Herald_Hymn(self, x, y):
-        unit = self.b.board[y][x]
-        unit.change_power(2)
-        for i in range(4):
-            cell = self.b.board[y][i]
-            if cell is not None:
-                if cell.player == unit.player:
-                    self.move_unit(y, i, -1, 0)
-
 
 def run():
     # Card(cost,power,move,tribe,name)
@@ -445,8 +339,8 @@ def run():
     deck1.add_card(Card(2, 1, 0, "satyr", "Dopplebocks"))
     deck1.add_card(Card(3, 3, 0, "", "Moonlit_Aerie"))
     deck1.add_card(Card(4, 3, 0, "", "Cursed_Cemetery"))
-    deck1.add_card(Card(6, 0, 0, "spell", "Kindred's_Grace"))
-    deck1.add_card(Card(7, 0, 0, "spell", "Herald's_Hymn"))
+    deck1.add_card(Card(6, 0, 0, "spell", "Kindreds_Grace"))
+    deck1.add_card(Card(7, 0, 0, "spell", "Heralds_Hymn"))
     deck1.add_card(Card(3, 1, 1, "satyr", "Counselor_Ahmi"))
     deck1.add_card(Card(3, 2, 1, "satyr", "Faun_Companions"))
     deck1.add_card(Card(3, 1, 1, "satyr", "Swarmcallers"))
@@ -458,6 +352,10 @@ def run():
     g = Game(deck, deck1)
     g.display()
     g.play(0,-1,4)
+    g.end_turn()
+    g.play(1,2,4)
+    g.end_turn()
+    g.end_turn()
     g.display()
 
 

@@ -7,7 +7,7 @@ class Cursed_Cemetery(Unit):
         self.is_building = True
 
     def start_turn(self, player1: Player, player2: Player, b: Board):
-        if self.x - 1 > -1 and not self.is_unit_at(self.x - 1, self.y, b):
+        if self.x - 1 > -1 and not b.is_unit_at(self.x - 1, self.y):
             b.board[self.y][self.x - 1] = Unit(1, self.player, self.x - 1, self.y, "undead")
-        if self.x + 1 < 4 and not self.is_unit_at(self.x + 1, self.y, b):
+        if self.x + 1 < 4 and not b.is_unit_at(self.x + 1, self.y):
             b.board[self.y][self.x + 1] = Unit(1, self.player, self.x + 1, self.y, "undead")

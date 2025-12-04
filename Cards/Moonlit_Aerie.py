@@ -7,7 +7,7 @@ class Moonlit_Aerie(Unit):
         self.is_building = True
 
     def start_turn(self, player1: Player, player2: Player, b: Board):
-        units = self.all_units(b)
+        units = b.all_units()
         good = []
         for unit in units:
             if unit.player == self.player and unit.tribe == "satyr":

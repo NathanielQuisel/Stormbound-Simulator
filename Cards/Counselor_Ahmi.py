@@ -7,7 +7,7 @@ class Counselor_Ahmi(Unit):
 
     def on_play(self, player1: Player, player2: Player, b: Board):
         check = True
-        for unit in self.surrounding_units(b):
+        for unit in b.surrounding_units(self.x,self.y):
             check = check and unit.is_building
         player1.deck.cards.pop(len(player1.deck.cards) - 1)
         if check:

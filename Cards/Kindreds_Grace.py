@@ -11,6 +11,6 @@ class Kindreds_Grace(Spell):
     def on_play(self, player1: Player, player2: Player, b: Board):
         unit = b.board[self.y][self.x]
         unit.change_power(5)
-        for u in Unit.all_units(Unit,self.b):
+        for u in b.all_units():
             if u.tribe == unit.tribe and u.player == unit.player:
                 u.change_power(2)

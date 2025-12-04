@@ -16,4 +16,4 @@ class Heralds_Hymn(Spell):
             if cell is not None:
                 if cell.player == unit.player:
                     #this needs to be changed bc move_unit function within the Game class
-                    self.move_unit(self.y, i, -1, 0)
+                    b.move_unit(unit.player, player1, player2, self.y, i, -1, 0)

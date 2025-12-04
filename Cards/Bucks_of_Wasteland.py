@@ -6,7 +6,7 @@ class Bucks_of_Wasteland(Unit):
         super().__init__(power, player, x, y, tribe)
 
     def on_survive(self, amount, player1: Player, player2: Player, b: Board):
-        units = self.all_units(b)
+        units = b.all_units()
         units.remove(self)
         good = []
         for unit in units:
