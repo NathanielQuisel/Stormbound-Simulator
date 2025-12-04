@@ -1,6 +1,6 @@
 import random
 from typing import Optional
-from ..Helper_Classes import Unit,Board,Player
+from Helper_Classes import Unit,Board,Player
 
 class Vindictive_Wretches(Unit):  # has not been tested in a bit/updated
     def __init__(self, power, player, x, y, tribe):

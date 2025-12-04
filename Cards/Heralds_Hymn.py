@@ -1,5 +1,5 @@
 import random
-from ..Helper_Classes import Unit,Board,Player,Spell
+from Helper_Classes import Unit,Board,Player,Spell
 
 class Heralds_Hymn(Spell):
     def __init__(self, player, x, y):

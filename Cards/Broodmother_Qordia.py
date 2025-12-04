@@ -1,6 +1,6 @@
 import random
-from ..Helper_Classes import Unit,Board,Player
-import Dragon_Egg
+from Helper_Classes import Unit,Board,Player
+from .Dragon_Egg import Dragon_Egg
 
 class Broodmother_Qordia(Unit):
     def __init__(self, power, player, x, y, tribe):

@@ -1,5 +1,5 @@
 import random
-from ..Helper_Classes import Unit,Board,Player,Spell
+from Helper_Classes import Unit,Board,Player,Spell
 
 class Kindreds_Grace(Spell):
     def __init__(self, player, x, y):

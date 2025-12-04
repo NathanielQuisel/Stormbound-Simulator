@@ -1,5 +1,5 @@
 import random
-from ..Helper_Classes import Unit,Board,Player
+from Helper_Classes import Unit,Board,Player
 
 
 class Amberhides(Unit):

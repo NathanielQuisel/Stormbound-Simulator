@@ -1,4 +1,5 @@
-import Board,Player
+from .Board import Board
+from .Player import Player
 
 class Spell:
     target_type = None

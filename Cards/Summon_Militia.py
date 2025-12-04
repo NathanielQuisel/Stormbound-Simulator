@@ -1,5 +1,5 @@
 import random
-from ..Helper_Classes import Unit,Board,Player,Spell
+from Helper_Classes import Unit,Board,Player,Spell
 
 class Summon_Militia(Spell):
     def __init__(self, player):

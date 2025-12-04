@@ -1,5 +1,5 @@
 import random
-from ..Helper_Classes import Unit,Board,Player,Card
+from Helper_Classes import Unit,Board,Player,Card
 
 class Counselor_Ahmi(Unit):
     def __init__(self, power, player, x, y, tribe):

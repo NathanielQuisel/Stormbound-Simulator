@@ -1,4 +1,5 @@
-import Board,Player
+from .Board import Board
+from .Player import Player
 
 class Unit:
     def __init__(self, power, player, x, y, tribe):
@@ -20,6 +21,7 @@ class Unit:
         self.x = x
         self.y = y
 
+    #these functions should really belong in the Board class
     def is_unit_at(self, x, y, b: Board):
         # returns false if out of bounds
         # returns false if something is not there

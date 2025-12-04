@@ -1,5 +1,5 @@
 import random
-from ..Helper_Classes import Unit,Board,Player
+from Helper_Classes import Unit,Board,Player
 
 class Crimson_Sentry(Unit):
     def __init__(self, power, player, x, y, tribe):
