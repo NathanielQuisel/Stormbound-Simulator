@@ -1,28 +1,37 @@
 import random
-from typing import Optional
-from Helper_Classes import Deck,Player,Board,Unit,Card
-from Cards import (
-    Amberhides,
-    Broodmother_Qordia,
-    Bucks_of_Wasteland,
-    Copperskin_Ranger,
-    Counselor_Ahmi,
-    Crimson_Sentry,
-    Cursed_Cemetery,
-    Dopplebocks,
-    Dragon_Egg,
-    Dreadfauns,
-    Edrik_the_Fierce,
-    Faun_Companions,
-    First_Mutineer,
-    Freebooters,
-    Moonlit_Aerie,
-    Northsea_Dog,
-    Siren_of_the_Seas,
-    Swarmcallers,
-    Ubass_the_Hunter,
-    Vindictive_Wretches,
-)
+import copy
+import numpy as np
+from typing import List, Tuple, Dict, Optional, Union
+from Helper_Classes import Deck,Player,Board,Unit,Card,Spell
+import Cards
+# from Cards import (
+#     Amberhides,
+#     Broodmother_Qordia,
+#     Bucks_of_Wasteland,
+#     Copperskin_Ranger,
+#     Counselor_Ahmi,
+#     Crimson_Sentry,
+#     Cursed_Cemetery,
+#     Dopplebocks,
+#     Dragon_Egg,
+#     Dreadfauns,
+#     Edrik_the_Fierce,
+#     Faun_Companions,
+#     First_Mutineer,
+#     Freebooters,
+#     Moonlit_Aerie,
+#     Northsea_Dog,
+#     Siren_of_the_Seas,
+#     Swarmcallers,
+#     Ubass_the_Hunter,
+#     Vindictive_Wretches,
+# )
+
+Coord      = Tuple[int, int]          # (x, y) board position
+PlayAction = Tuple[int, Coord]        # (card_idx, (x, y))
+CycleAction= Tuple[int]               # (card_idx,)  — cycle a card
+PassAction = Tuple[()]                # ()           — end turn
+Action     = Union[PlayAction, CycleAction, PassAction]
 
 # y is first index, x is second, also top left is [0][0] for indexing, but for player bottom left is 0,0
 class Game:
@@ -52,6 +61,7 @@ class Game:
         else:
             return self.player2, self.player1
 
+    #returns true if card_num is a spell and player has the mana to play it
     def check_spell(self, card_num):
         (player, _) = self.find_players()
         cost = player.hand[card_num].cost
@@ -62,6 +72,8 @@ class Game:
         cost = player.hand[card_num].cost
         return player.limit <= y and self.b.board[y][x] is None and cost <= player.remain_mana
 
+    #currently only checks if the thing is a unit and is owned by the active player
+    #will need to change for spells that target enemies or buildings
     def check_single_target(self, x, y, player):
         if self.b.board[y][x] is not None:
             return player == 3 or (self.b.board[y][x].player == player and not self.b.board[y][x].is_building)
@@ -70,60 +82,30 @@ class Game:
         (player, enemy) = self.find_players()
         card: Card = player.hand[card_num]
         if self.check_spell(card_num):
-            if card.name == "Summon_Militia":
+            spell = getattr(Cards, card.name, Spell) (self.cur_player,x,y)
+            if spell.valid_play(self.b):
                 player.play_card(card_num)
-                self.Summon_Militia(player)
-            elif card.name == "Kindred's_Grace":
-                if self.check_single_target(x, y, self.cur_player):
-                    player.play_card(card_num)
-                    self.Kindred_Grace(x, y)
-            elif card.name == "Herald's_Hymn":
-                if self.check_single_target(x, y, self.cur_player):
-                    player.play_card(card_num)
-                    self.Herald_Hymn(x, y)
+                spell.on_play(player,enemy, self.b)
+            # if card.name == "Summon_Militia":
+            #     player.play_card(card_num)
+            #     self.Summon_Militia(player)
+            # elif card.name == "Kindred's_Grace":
+            #     if self.check_single_target(x, y, self.cur_player):
+            #         player.play_card(card_num)
+            #         self.Kindred_Grace(x, y)
+            # elif card.name == "Herald's_Hymn":
+            #     if self.check_single_target(x, y, self.cur_player):
+            #         player.play_card(card_num)
+            #         self.Herald_Hymn(x, y)
 
         elif self.check_play(card_num, x, y):
             player.play_card(card_num)
             if card.name == "Generic":
                 self.b.board[y][x] = Unit(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Copperskin_Ranger":
-                self.b.board[y][x] = Copperskin_Ranger(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "First_Mutineer":
-                self.b.board[y][x] = First_Mutineer(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Crimson_Sentry":
-                self.b.board[y][x] = Crimson_Sentry(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Edrik_the_Fierce":
-                self.b.board[y][x] = Edrik_the_Fierce(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Amberhides":
-                self.b.board[y][x] = Amberhides(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Freebooters":
-                self.b.board[y][x] = Freebooters(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Northsea_Dogs":
-                self.b.board[y][x] = Northsea_Dog(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Siren_of_the_Seas":
-                self.b.board[y][x] = Siren_of_the_Seas(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Ubass_the_Hunter":
-                self.b.board[y][x] = Ubass_the_Hunter(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Vindictive_Wretches":
-                self.b.board[y][x] = Vindictive_Wretches(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Dopplebocks":
-                self.b.board[y][x] = Dopplebocks(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Counselor_Ahmi":
-                self.b.board[y][x] = Counselor_Ahmi(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Faun_Companions":
-                self.b.board[y][x] = Faun_Companions(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Swarmcallers":
-                self.b.board[y][x] = Swarmcallers(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Dreadfauns":
-                self.b.board[y][x] = Dreadfauns(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Bucks_of_Wasteland":
-                self.b.board[y][x] = Bucks_of_Wasteland(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Broodmother_Qordia":
-                self.b.board[y][x] = Broodmother_Qordia(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Moonlit_Aerie":
-                self.b.board[y][x] = Moonlit_Aerie(card.power, self.cur_player, x, y, card.tribe)
-            elif card.name == "Cursed_Cemetery":
-                self.b.board[y][x] = Cursed_Cemetery(card.power, self.cur_player, x, y, card.tribe)
+            else:
+                self.b.board[y][x] = getattr(Cards, card.name, Unit)(
+                    card.power, self.cur_player, x, y, card.tribe
+                )
 
             unit: Unit = self.b.board[y][x]
             directions = self.find_move_path(y, x, card.move)
@@ -290,6 +272,141 @@ class Game:
         self.advance_units()
         self.set_p_limit()
 
+    
+    def _flatten_board(board) -> np.ndarray:
+        """
+        Encode the 5×4 board into a vector of ints.
+
+        Each cell → 0 (empty) | ±pow   (sign = owner)  | 100+   for buildings.
+        Feel free to swap in one-hot or more elaborate encodings later.
+        """
+        #need to change the above encodings to manage buildings better
+        #buildings will need to also represent their power, that they are a building,
+        #and who owns them
+
+        #also units will need to represent what unit type they are and what active abilities they have
+        vec = np.zeros(5 * 4, dtype=np.int16)
+        k = 0
+        for y in range(5):
+            for x in range(4):
+                unit = board[y][x]
+                if unit is None:
+                    vec[k] = 0
+                elif unit.is_building:
+                    vec[k] = 100 + unit.player     # buildings are ≥100
+                else:
+                    vec[k] = unit.power if unit.player == 1 else -unit.power
+                k += 1
+        return vec
+    
+    def reset(self, deck1: Deck, deck2: Deck):
+        """
+        Re-instantiate the game and return the starting observation.
+        """
+        self.__init__(deck1, deck2)
+        return self._get_observation()
+
+    def _get_observation(self) -> np.ndarray:
+        """
+        Concatenate
+        • board vector (20 ints)
+        • P1 hand (4 card ids)   – use 0 if slot empty
+        • P2 hand (4 card ids)
+        • current player flag
+        • remaining mana of both players
+        Produces a 20 + 4 + 4 + 1 + 2 = 31-element vector.
+        """
+        board_vec      = self._flatten_board(self.b.board)
+        p1_hand_ids    = [c.card_id for c in self.player1.hand] + [0]*(4-len(self.player1.hand))
+        p2_hand_ids    = [c.card_id for c in self.player2.hand] + [0]*(4-len(self.player2.hand))
+        obs = np.array(list(board_vec) +
+                    p1_hand_ids +
+                    p2_hand_ids +
+                    [self.cur_player] +
+                    [self.player1.remain_mana,
+                        self.player2.remain_mana],
+                    dtype=np.int16)
+        return obs
+
+    def get_legal_actions(self) -> List[Action]:
+        """
+        Enumerate every legal move for the *current* player and
+        return them as tuples the `step` method can consume.
+
+        • Play  -> (card_idx, (x, y))
+        • Cycle -> (card_idx,)
+        • Pass  -> ()
+        """
+        legal: List[Action] = []
+
+        player, _ = self.find_players()
+
+        # -- cycle any hand card (Stormbound rule permits cycling once per turn)
+        if player.can_cycle:
+            for idx in range(len(player.hand)):
+                legal.append((idx,))            # CycleAction
+
+        # -- play any card that can be afforded / placed
+        for idx, card in enumerate(player.hand):
+            # Spell?
+            if self.check_spell(idx):
+                # single-target spells need targets; otherwise () target
+                # Here we allow any board cell that satisfies check_single_target
+                # is not right for spells that do not target
+                for y in range(5):
+                    for x in range(4):
+                        if self.check_single_target(x, y, self.cur_player):
+                            legal.append((idx, (x, y)))
+            else:  # Unit / building cards
+                for y in range(player.limit, 5):
+                    for x in range(4):
+                        if self.check_play(idx, x, y):
+                            legal.append((idx, (x, y)))
+
+        # -- optional pass
+        legal.append(tuple())               # PassAction
+
+        return legal
+
+    def step(self, action: Action):
+        """
+        Apply an Action and advance the environment by **one
+        *player* turn** (i.e., includes end_turn call).
+
+        Returns: (obs, reward, done, info)
+        """
+        player, enemy = self.find_players()
+
+        # --- decode action --------------------------------------
+        if action == tuple():                       # Pass
+            self.end_turn()
+        elif len(action) == 1:                      # Cycle
+            card_idx, = action
+            self.cycle(card_idx)
+        else:                                       # Play
+            card_idx, (x, y) = action
+            self.play(card_idx, x, y)
+
+        # End of turn: let automatic effects trigger
+        
+
+        # --- compute reward -------------------------------------
+        # Simple zero-sum: +1 if current player reduced enemy life to 0
+        #                  -1 if they lost
+        #                  0 otherwise.
+        reward = 0
+        done   = False
+        if enemy.life <= 0 and player.life > 0:
+            reward = 1
+            done   = True
+        elif player.life <= 0 and enemy.life > 0:
+            reward = -1
+            done   = True
+
+        obs  = self._get_observation()
+        info = {}                       # add diagnostics here
+        return obs, reward, done, info
+
     def Summon_Militia(self, player: Player):
         good = []
         for i in range(5):
@@ -350,5 +467,9 @@ def run():
     deck1.add_card(Card(2, 2, 0, "satyr", "Generic"))
     # deck1.shuffle()
     g = Game(deck, deck1)
+    g.display()
+    g.play(0,-1,4)
+    g.display()
+
 
 run()

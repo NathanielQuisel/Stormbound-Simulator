@@ -18,3 +18,6 @@ from .Siren_of_the_Seas import Siren_of_the_Seas
 from .Swarmcallers import Swarmcallers
 from .Ubass_the_Hunter import Ubass_the_Hunter
 from .Vindictive_Wretches import Vindictive_Wretches
+from .Summon_Militia import Summon_Militia
+from .Heralds_Hymn import Heralds_Hymn
+from .Kindreds_Grace import Kindreds_Grace

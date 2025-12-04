@@ -2,7 +2,7 @@ import random
 from Helper_Classes import Unit,Board,Player,Spell
 
 class Summon_Militia(Spell):
-    def __init__(self, player):
+    def __init__(self, player, x, y):
         super().__init__(player)
         
 
@@ -10,7 +10,7 @@ class Summon_Militia(Spell):
         good = []
         for i in range(5):
             for j in range(4):
-                if self.b.board[i][j] is None and i >= player1.limit:
+                if b.board[i][j] is None and i >= player1.limit:
                     good.append((i, j))
         if good != []:
             rand = random.randint(0, len(good) - 1)
