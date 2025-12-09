@@ -190,6 +190,9 @@ class Game:
         Each cell → 0 (empty) | ±pow   (sign = owner)  | 100+   for buildings.
         Feel free to swap in one-hot or more elaborate encodings later.
         """
+        #should really encode, who the unit belongs to and what unit it is, and maybe whether or not it is a building
+        #what the tribe is also encoded (but much less important)
+
         #need to change the above encodings to manage buildings better
         #buildings will need to also represent their power, that they are a building,
         #and who owns them
@@ -260,13 +263,17 @@ class Game:
         for idx, card in enumerate(player.hand):
             # Spell?
             if self.check_spell(idx):
-                # single-target spells need targets; otherwise () target
-                # Here we allow any board cell that satisfies check_single_target
-                # is not right for spells that do not target
-                for y in range(5):
-                    for x in range(4):
-                        if self.check_single_target(x, y, self.cur_player):
-                            legal.append((idx, (x, y)))
+
+                spell = getattr(Cards, card.name, Spell) (self.cur_player,-1,-1)
+                if spell.valid_play(self.b):
+                    legal.append((idx, (-1,-1)))
+                else:
+                    for y in range(5):
+                        for x in range(4):
+                            spell.x = x
+                            spell.y = y
+                            if spell.valid_play(self.b):
+                                legal.append((idx, (x, y)))
             else:  # Unit / building cards
                 for y in range(player.limit, 5):
                     for x in range(4):
@@ -304,6 +311,8 @@ class Game:
         # Simple zero-sum: +1 if current player reduced enemy life to 0
         #                  -1 if they lost
         #                  0 otherwise.
+
+        #NEED to create a reward function that actually reflects how well the player is doing
         reward = 0
         done   = False
         if enemy.life <= 0 and player.life > 0:
@@ -337,8 +346,8 @@ def run():
     deck1: Deck = Deck()
 
     deck1.add_card(Card(2, 1, 0, "satyr", "Dopplebocks"))
-    deck1.add_card(Card(3, 3, 0, "", "Moonlit_Aerie"))
-    deck1.add_card(Card(4, 3, 0, "", "Cursed_Cemetery"))
+    deck1.add_card(Card(3, 3, 0, "building", "Moonlit_Aerie"))
+    deck1.add_card(Card(4, 3, 0, "building", "Cursed_Cemetery"))
     deck1.add_card(Card(6, 0, 0, "spell", "Kindreds_Grace"))
     deck1.add_card(Card(7, 0, 0, "spell", "Heralds_Hymn"))
     deck1.add_card(Card(3, 1, 1, "satyr", "Counselor_Ahmi"))
@@ -350,6 +359,19 @@ def run():
     deck1.add_card(Card(2, 2, 0, "satyr", "Generic"))
     # deck1.shuffle()
     g = Game(deck, deck1)
+    g.display()
+    # g.play(0,-1,4)
+    g.end_turn()
+    g.play(1,2,4)
+    g.end_turn()
+    # g.play(1,3,4)
+    g.end_turn()
+    g.play(0,0,4)
+    g.end_turn()
+    # g.play(2,0,3)
+    # g.play(1,1,3)
+    g.end_turn()
+    g.play(1,2,4)
     g.display()
 
 
